@@ -126,7 +126,7 @@ class BasketSummaryView(BasketView):
                     # for an item in the basket.
                     list(messages.get_messages(self.request))
 
-            if line.has_discount:
+            if line.has_discount and line.discount_value > 0:
                 benefit = self.request.basket.applied_offers().values()[0].benefit
                 benefit_value = format_benefit_value(benefit)
             else:
