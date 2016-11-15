@@ -175,12 +175,12 @@
                     }
                 }
                 .course-price {
+                    @include margin-right(5px);
                     text-align: center;
 
                     span { text-decoration: line-through; }
                 }
                 .course-new-price {
-                    @include margin-left(5px);
                     text-align: center;
                     font-weight: bold;
                     color: $offer-page-price-blue;
