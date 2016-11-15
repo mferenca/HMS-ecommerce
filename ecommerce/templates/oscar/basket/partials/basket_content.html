@@ -56,7 +56,7 @@
                                     <label class="course-price-label text-muted">{% trans 'Price' %}</label>
                                 {% endif %}
 
-                                {% if line_data.line.has_discount %}
+                                {% if line_data.line.has_discount and line_data.benefit_value %}
                                     <div class="discount">
                                         <div class="benefit">
                                             {% blocktrans with benefit_value=line_data.benefit_value %}
