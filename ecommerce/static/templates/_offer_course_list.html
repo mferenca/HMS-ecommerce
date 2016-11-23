@@ -19,7 +19,7 @@
                 <div class="box-shadow col-xs-12">
                     <div class="col-sm-5">
                         <div class="image-container">
-                            <% if (course.attributes.benefit.value) { %>
+                            <% if (course.attributes.benefit.value && course.attributes.benefit.value != 100) { %>
                                 <div class="discount-percentage"><p><%= course.attributes.benefit_value %>
                                     <span><%- gettext('off') %></span></p>
                                 </div>
@@ -40,23 +40,24 @@
                         <p class="course-start"><%= course.attributes.course_start_date_text %></p>
 
                         <div class="discount-mc-price-group clearfix">
-                            <% if (course.attributes.benefit.value) { %>
+                            <% if (course.attributes.benefit.value && course.attributes.benefit.value != 100) { %>
                                 <div class="pull-left">
                                     <p class="course-price">
                                         <span>$<%= course.attributes.stockrecords.price_excl_tax %></span>
                                     </p>
                                 </div>
                             <% } %>
-                            <div class="pull-left">
-                                <p class="course-new-price">
-                                    <span>
-                                        <% if (course.attributes.benefit.value) { %>
-                                            <%- gettext('Now') %>
-                                        <% } %>
-                                        $<%= course.attributes.new_price %>
-                                    </span>
-                                </p>
-                            </div>
+                            <% if (course.attributes.benefit.value != 100) { %>
+                                <div class="pull-left">
+                                    <p class="course-new-price">
+                                        <span>
+                                                <% if (course.attributes.benefit.value) { %>
+                                                    <%- gettext('Now') %>
+                                                <% } %>
+                                                $<%= course.attributes.new_price %>
+                                        </span>
+                                    </p>
+                                </div>
                             <% } %>
                             <div class="pull-right">
                                     <% if (isCredit) { %>
