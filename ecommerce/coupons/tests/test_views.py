@@ -384,7 +384,7 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
         self.mock_account_api(self.request, self.user.username, data={'is_active': False})
         self.create_and_test_coupon()
         response = self.client.get(self.redeem_url_with_params)
-        msg = 'You need to activate your account in order to redeem this coupon.'
+        msg = 'You need to activate your account to continue enrolling in this course. Please check your email and follow the activation link that has been sent to you. After you have activated your account, refresh this page to continue enrolling in the course, or re-open the original course enrollment link sent to you by HMX.'
         self.assertEqual(response.context['error'], _(msg))
 
 
