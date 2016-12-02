@@ -179,6 +179,11 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
         if not voucher.offers.first().is_email_valid(request.user.email):
             return render(request, template_name, {'error': _('You are not eligible to use this coupon.')})
 
+        if not request.user.account_details(request)['is_active']:
+            return render(request, template_name, {
+                'error': _('You need to activate your account to continue enrolling in this course. Please check your email and follow the activation link that has been sent to you. After you have activated your account, refresh this page to continue enrolling in the course, or re-open the original course enrollment link sent to you by HMX.')
+            })
+
         if request.user.is_user_already_enrolled(request, product):
             return render(request, template_name, {'error': _('You are already enrolled in the course.')})
 
