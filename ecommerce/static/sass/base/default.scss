@@ -1,7 +1,7 @@
 // local variables
 // --------------------
 $brand-logo-path: '/static/images/default-logo.png' !default;
-$brand-logo-width: 72px !default;
+$brand-logo-width: 273px !default;
 $brand-logo-height: 48px !default;
 
 // utilities
@@ -11,6 +11,6 @@ $brand-logo-height: 48px !default;
 // --------------------
 .navbar-brand {
     .navbar-brand-logo {
-        @include brand-logo($brand-logo-path, $brand-logo-width, $brand-logo-height, 39px);
+        @include brand-logo($brand-logo-path, $brand-logo-width, $brand-logo-height, 48px);
     }
 }
