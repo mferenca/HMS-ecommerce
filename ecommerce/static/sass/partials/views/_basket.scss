@@ -198,9 +198,9 @@
 
         .payment-buttons {
             .payment-button {
-                border-color: #1E8142;
+                border-color: palette(primary, accent);
                 padding: spacing-vertical(small) spacing-horizontal(mid-large);
-                background: #1E8142;
+                background: palette(primary, accent);
                 color: #fcfcfc;
                 font-size: 18px;
 
@@ -208,8 +208,8 @@
                 &.is-hovered,
                 &:focus,
                 &.is-focused {
-                    border-color: #25B85A;
-                    background: #25B85A;
+                    border-color: palette(secondary, accent);
+                    background: palette(secondary, accent);
                 }
             }
         }
@@ -224,7 +224,7 @@
     }
 
     .discounted {
-        color: green;
+        color: #434242;
     }
 }
 
