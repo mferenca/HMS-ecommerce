@@ -19,7 +19,9 @@
   border-radius: 0;
 
   // Add our own border
-  border-bottom: $navbar-border-bottom-width solid palette(primary, accent);
+  .container {
+    border-bottom: $navbar-border-bottom-width solid palette(secondary, accent);
+  }
 
   // Vertically center the logo
   .navbar-brand {

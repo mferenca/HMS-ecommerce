@@ -8,6 +8,9 @@ $fa-font-path: "/static/bower_components/fontawesome/fonts";
 // UX Pattern Library font directory
 $font-path: '/static/bower_components/edx-ux-pattern-library/_src/pattern-library/fonts';
 
+// Alternate font directory
+$alternate-font-path: '/static/fonts';
+
 // Use asset paths relative to Bootstrap SASS files.
 $bootstrap-sass-asset-helper: true;
 
@@ -26,7 +29,7 @@ $font-family-monospace: 'Bitstream Vera Sans Mono', Consolas, Courier, monospace
 // navbar
 $navbar-default-bg: white;
 $navbar-height: 74px;
-$navbar-border-bottom-width: 4px;
+$navbar-border-bottom-width: 3px;
 
 // Footer
 $footer-bg: $body-bg;
@@ -51,3 +54,18 @@ $pagination-darker-silver: #ddd;
 
 $small-input-width: 174px;
 $input-addon-width: 40px;
+
+// Change primary color
+$brand-primary-accent: rgb(196, 23, 49);
+$brand-secondary-accent: rgb(165, 28, 48);
+
+// Add new font families
+@font-face {
+  font-family: "AvenirLTStd-Book";
+  font-style: normal;
+  font-weight: 300;
+  src: url("#{$alternate-font-path}/webfonts/2E4AF2_0_0.eot") format("eot"),
+       url("#{$alternate-font-path}/webfonts/2E4AF2_0_0.woff2") format("woff2"),
+       url("#{$alternate-font-path}/webfonts/2E4AF2_0_0.woff") format("woff"),
+       url("#{$alternate-font-path}/webfonts/2E4AF2_0_0.ttf") format("ttf");
+}
