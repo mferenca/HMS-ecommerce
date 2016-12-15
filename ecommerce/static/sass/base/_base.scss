@@ -10,6 +10,14 @@ body {
   p {
     font-family: "AvenirLTStd-Book", sans-serif;
   }
+  .btn-primary, .btn-success {
+    background-color: palette(primary, accent); // $brand-primary-accent !important;
+    border-color: palette(primary, accent);;
+    &:active, &:focus, &:hover  {
+      background-color: palette(secondary, accent) !important;
+      border-color: palette(secondary, accent);
+    }
+  }
 }
 
 a {

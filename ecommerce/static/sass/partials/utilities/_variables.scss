@@ -56,9 +56,9 @@ $pagination-darker-silver: #ddd;
 $small-input-width: 174px;
 $input-addon-width: 40px;
 
-// Change primary color
-$brand-primary-accent: rgb(196, 23, 49);
-$brand-secondary-accent: rgb(165, 28, 48);
+// Change primary and secondary color
+$brand-primary-accent: rgb(196, 23, 49);    // #C41731 - Harvard red
+$brand-secondary-accent: rgb(165, 28, 48);  // #A51C30 - darker red
 
 // Add new font families
 @font-face {
