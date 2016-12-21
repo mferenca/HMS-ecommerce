@@ -16,33 +16,30 @@
       </div>
     </div>
 
-    <div class="collapse navbar-collapse" id="main-navbar-collapse">
-      <ul class="nav navbar-nav navbar-right">
-        {% if user.is_authenticated %}
-          <li class="btn-group user-menu">
-            <button type="button" class="btn btn-default hidden-xs main-btn nav-button"
-                    onclick="window.open('{{ lms_dashboard_url }}');">
-              <i class="icon fa fa-home" aria-hidden="true"></i>
-              <span class="sr-only">{% trans "Dashboard for:" %}</span>
-              {{ user.username }}
-            </button>
-            <button type="button" class="btn btn-default dropdown-toggle hidden-xs nav-button"
-                    data-toggle="dropdown"
-                    aria-haspopup="true">
-              <span class="caret"></span>
-              <span class="sr-only">{% trans "Toggle Dropdown" %}</span>
-            </button>
-            <ul class="dropdown-menu" aria-expanded="false">
-              {% block dropdown_menu %}{% endblock dropdown_menu %}
-            </ul>
-              {% block small_dropdown_menu %}{% endblock small_dropdown_menu %}
-          </li>
-        {% else %}
-          <a class="btn btn-primary navbar-btn hidden-xs" href="{% url 'login' %}">{% trans "Login" %}</a>
-          <li class="visible-xs"><a class="nav-link" href="{% url 'login' %}">{% trans "Login" %}</a></li>
-          </a>
-        {% endif %}
-      </ul>
-    </div>
+    {% if not hide_user_id %}
+        <div class="collapse navbar-collapse" id="main-navbar-collapse">
+          <ul class="nav navbar-nav navbar-right">
+            {% if user.is_authenticated %}
+              <li class="btn-group user-menu">
+                <button type="button" class="btn btn-default hidden-xs main-btn nav-button"
+                        onclick="window.open('{{ lms_dashboard_url }}');">
+                  <span class="sr-only">{% trans "Dashboard for:" %}</span>
+                  My Account
+                </button>
+                <button type="button" class="btn btn-default dropdown-toggle hidden-xs nav-button"
+                        data-toggle="dropdown"
+                        aria-haspopup="true">
+                  <span class="caret"></span>
+                  <span class="sr-only">{% trans "Toggle Dropdown" %}</span>
+                </button>
+                <ul class="dropdown-menu" aria-expanded="false">
+                  {% block dropdown_menu %}{% endblock dropdown_menu %}
+                </ul>
+                  {% block small_dropdown_menu %}{% endblock small_dropdown_menu %}
+              </li>
+            {% endif %}
+          </ul>
+        </div>
+    {% endif %}
   </div>
 </nav>

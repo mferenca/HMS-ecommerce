@@ -17,7 +17,7 @@
         <% _.each(page, function(course) { %>
             <div class="discount-multiple-courses col-xs-12 <% if (courses.length > 1) { %>col-lg-6<% } %>">
                 <div class="box-shadow col-xs-12">
-                    <div class="col-sm-5">
+                    <div class="col-sm-3">
                         <div class="image-container">
                             <% if (course.attributes.benefit.value && course.attributes.benefit.value != 100) { %>
                                 <div class="discount-percentage"><p><%= course.attributes.benefit_value %>
@@ -32,7 +32,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-sm-7 col-xs-12">
+                    <div class="col-sm-9 col-xs-12">
                         <p class="course-name"><%= course.attributes.title %></p>
 
                         <p class="course-org"><%= course.attributes.organization %></p>
@@ -105,7 +105,7 @@
     <% } else { %>
         <div class="depth depth-2 message-error col-xs-12">
             <h3>No courses returned!</h3>
-            <%- gettext("If you need assistance, contact edX support.") %>
+            <%- gettext("If you need assistance, contact onlinelearning@hms.harvard.edu.") %>
         </div>
     <% } %>
 </section>
