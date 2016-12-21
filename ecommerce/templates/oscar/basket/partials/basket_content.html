@@ -91,7 +91,6 @@
                                 {% endblocktrans %}
                                 <form action="{% url 'basket:vouchers-remove' pk=voucher.id %}" method="POST">
                                     {% csrf_token %}
-                                    <button class="remove-voucher" type="submit"><i class="fa fa-times"></i></button>
                                 </form>
                                 </p>
                             {% endfor %}
