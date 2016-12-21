@@ -1,0 +1,76 @@
+// base_navbar
+// --------------------------------------------------
+
+.btn-group.user-menu {
+
+  .nav-button {
+    background-color: white;
+    border: none;
+    color: black;
+    &:active {
+      box-shadow: none;
+    }
+
+    .caret {
+      margin-top: 5px;
+    }
+  }
+
+  .main-btn {
+    background-color: white;
+    border: none;
+
+    padding: 10px 13px 12px;
+
+    font-family: AvenirLTStd-Book, sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    text-transform: uppercase;
+    color: #8C8179;
+
+    &:hover,
+    &:focus {
+      background-color: #f6f6f6;
+      color: black;
+    }
+  }
+
+  .dropdown-toggle:focus {
+    background-color: white;
+    box-shadow: none;
+  }
+
+  .dropdown-menu {
+    border-radius: 4px;
+    box-shadow: 0 2px 2px 0 rgba(0,0,0,0.3);
+    border: 1px solid #c8c8c8;
+    padding: 5px 10px;
+    top: 37px;
+    min-width: 120px;
+
+    .nav-link {
+      font-family: AvenirLTStd-Book, sans-serif;
+      font-size: 16px;
+      text-transform: uppercase;
+      color: #c41731;
+
+      &:hover {
+        background-color: white;
+      }
+    }
+  }
+
+  .dropdown-menu::before {
+    background: transparent;
+    border-top: 6px solid #fcfcfc;
+    border-right: 6px solid #fcfcfc;
+    border-bottom: 6px solid transparent;
+    border-left: 6px solid transparent;
+    box-shadow: 1px 0 0 0 #c8c8c8, 0 -1px 0 0 #c8c8c8;
+    content: "";
+    position: absolute;
+    transform: rotate(-45deg);
+    right: 5px;
+    top: -6px;
+  }
+}
