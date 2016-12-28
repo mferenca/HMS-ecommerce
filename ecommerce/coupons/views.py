@@ -181,7 +181,10 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
 
         if not request.user.account_details(request)['is_active']:
             return render(request, template_name, {
-                'error': _('You need to activate your account to continue enrolling in this course. Please check your email and follow the activation link that has been sent to you. After you have activated your account, refresh this page to continue enrolling in the course, or re-open the original course enrollment link sent to you by HMX.'),
+                'error': _('You are not done yet! You must follow these steps to complete your account registration and your course enrollment.'),
+                'account_activation_error': True,
+                'step_one': _('Confirm your account email address. Go to your email to find an account activation email. Follow the link in that email to activate your account.'),
+                'step_two': _('After you have activated your account, refresh this page to continue course enrollment, or re-open the original course enrollment link sent to you by HMX.'),
                 'hide_user_id': True
             })
 
