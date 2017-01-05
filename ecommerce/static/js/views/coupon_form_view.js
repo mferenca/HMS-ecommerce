@@ -161,6 +161,9 @@ define([
                 'input[name=course_seat_types]': {
                     observe: 'course_seat_types'
                 },
+                'input[name=email_domains]': {
+                    observe: 'email_domains'
+                },
                 'input[name=invoice_type]': {
                     observe: 'invoice_type'
                 },
@@ -248,6 +251,7 @@ define([
                         'start_date',
                         'tax_deducted_source',
                         'title',
+                        'email_domains'
                     ];
                 }
 
@@ -275,7 +279,7 @@ define([
                 var is_benefit_percentage = this.$('[name=benefit_type]:checked').val() === 'Percentage',
                     max_value = is_benefit_percentage ? '100' : '';
 
-                this.setLimitToElement(this.$('[name=benefit_value]'), max_value, 1);
+                this.setLimitToElement(this.$('[name=benefit_value]'), max_value, 0);
             },
 
             changeLimitForInvoiceDiscountValue: function () {
@@ -283,7 +287,7 @@ define([
                     '[name=invoice_discount_type]:checked').val() === 'Percentage',
                     max_value = is_invoice_discount_percentage ? '100' : '';
 
-                this.setLimitToElement(this.$('[name=invoice_discount_value]'), max_value, 1);
+                this.setLimitToElement(this.$('[name=invoice_discount_value]'), max_value, 0);
             },
 
             toggleDollarPercentIcon: function (val) {

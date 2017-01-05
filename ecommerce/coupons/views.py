@@ -18,7 +18,6 @@ from oscar.core.loading import get_class, get_model
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.core.views import StaffOnlyMixin
 from ecommerce.extensions.api import exceptions
-from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 
@@ -177,11 +176,23 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
         if not valid_voucher:
             return render(request, template_name, {'error': msg})
 
+        if not voucher.offers.first().is_email_valid(request.user.email):
+            return render(request, template_name, {'error': _('You are not eligible to use this coupon.')})
+
+        if not request.user.account_details(request)['is_active']:
+            return render(request, template_name, {
+                'error': _('You are not done yet! You must follow these steps to complete your account registration and your course enrollment.'),
+                'account_activation_error': True,
+                'step_one': _('Confirm your account email address. Go to your email to find an account activation email. Follow the link in that email to activate your account.'),
+                'step_two': _('After you have activated your account, refresh this page to continue course enrollment, or re-open the original course enrollment link sent to you by HMX.'),
+                'hide_user_id': True
+            })
+
         if request.user.is_user_already_enrolled(request, product):
             return render(request, template_name, {'error': _('You are already enrolled in the course.')})
 
         basket = prepare_basket(request, product, voucher)
-        if basket.total_excl_tax == AC.FREE:
+        if basket.total_excl_tax == 0:
             self.place_free_order(basket)
         else:
             return HttpResponseRedirect(reverse('basket:summary'))

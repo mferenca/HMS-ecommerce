@@ -7,7 +7,7 @@
 {% endblock title %}
 
 {% block navbar %}
-    {% include 'edx/partials/_student_navbar.html' %}
+    {% include 'edx/partials/_student_navbar.html' with hide_user_id=True %}
 {% endblock navbar %}
 
 
@@ -22,10 +22,4 @@
             {% include 'basket/partials/basket_content.html' %}
         </div>
     </div>
-
-    {% if analytics_data %}
-        <script type="text/javascript">
-            var initModelData = {{ analytics_data|safe }};
-        </script>
-    {% endif %}
 {% endblock content %}

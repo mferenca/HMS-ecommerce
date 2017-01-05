@@ -19,9 +19,9 @@ def prepare_basket(request, product, voucher=None):
     Create or get the basket, add the product, apply a voucher, and record referral data.
 
     Existing baskets are merged. The specified product will
-    be added to the remaining open basket. If a voucher is passed, all existing
-    ones added to the basket are removed because we allow only one voucher per
-    basket after the Voucher is applied to the basket.
+    be added to the remaining open basket. If voucher is passed, all existing
+    vouchers added to the basket are removed because we allow only one voucher per basket.
+    Vouchers are not applied if an enrollment code product is in the basket.
 
     Arguments:
         request (Request): The request object made to the view.
@@ -34,9 +34,10 @@ def prepare_basket(request, product, voucher=None):
     basket = Basket.get_basket(request.user, request.site)
     basket.flush()
     basket.add_product(product, 1)
-    if voucher:
-        for v in basket.vouchers.all():
-            basket.vouchers.remove(v)
+    if product.get_product_class().name == ENROLLMENT_CODE_PRODUCT_CLASS_NAME:
+        basket.clear_vouchers()
+    elif voucher:
+        basket.clear_vouchers()
         basket.vouchers.add(voucher)
         Applicator().apply(basket, request.user, request)
         logger.info('Applied Voucher [%s] to basket [%s].', voucher.code, basket.id)
@@ -49,6 +50,10 @@ def prepare_basket(request, product, voucher=None):
         )
     else:
         Referral.objects.filter(basket=basket).delete()
+
+    # Call signal handler to notify listeners that something has been added to the basket
+    basket_addition = get_class('basket.signals', 'basket_addition')
+    basket_addition.send(sender=basket_addition, product=product, user=request.user, request=request)
 
     return basket
 

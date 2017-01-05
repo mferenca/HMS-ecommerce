@@ -41,7 +41,15 @@ class AtomicPublicationTests(CourseCatalogTestMixin, TestCase):
                             'name': 'id_verification_required',
                             'value': False
                         }
-                    ]
+                    ],
+                    'course': {
+                        'create_enrollment_code': 'true',
+                        'honor_mode': True,
+                        'id': self.course_id,
+                        'name': self.course_name,
+                        'type': 'verified',
+                        'verification_deadline': None
+                    }
                 },
                 {
                     'product_class': 'Seat',
@@ -56,7 +64,15 @@ class AtomicPublicationTests(CourseCatalogTestMixin, TestCase):
                             'name': 'id_verification_required',
                             'value': False
                         }
-                    ]
+                    ],
+                    'course': {
+                        'create_enrollment_code': 'true',
+                        'honor_mode': True,
+                        'id': self.course_id,
+                        'name': self.course_name,
+                        'type': 'verified',
+                        'verification_deadline': None
+                    }
                 },
                 {
                     'product_class': 'Seat',
@@ -71,7 +87,15 @@ class AtomicPublicationTests(CourseCatalogTestMixin, TestCase):
                             'name': 'id_verification_required',
                             'value': True
                         }
-                    ]
+                    ],
+                    'course': {
+                        'create_enrollment_code': 'true',
+                        'honor_mode': True,
+                        'id': self.course_id,
+                        'name': self.course_name,
+                        'type': 'verified',
+                        'verification_deadline': None
+                    }
                 },
                 {
                     'product_class': 'Seat',
@@ -94,7 +118,15 @@ class AtomicPublicationTests(CourseCatalogTestMixin, TestCase):
                             'name': 'credit_hours',
                             'value': 1
                         }
-                    ]
+                    ],
+                    'course': {
+                        'create_enrollment_code': 'true',
+                        'honor_mode': True,
+                        'id': self.course_id,
+                        'name': self.course_name,
+                        'type': 'verified',
+                        'verification_deadline': None
+                    }
                 }
             ]
         }
@@ -196,8 +228,6 @@ class AtomicPublicationTests(CourseCatalogTestMixin, TestCase):
             # Verify product price and expiration time.
             expires = EXPIRES if product['expires'] else None
             self.assertEqual(seat.expires, expires)
-            print self.partner
-            print seat.stockrecords.all()
             self.assertEqual(seat.stockrecords.get(partner=self.partner).price_excl_tax, product['price'])
 
     def test_lms_publication_disabled(self):

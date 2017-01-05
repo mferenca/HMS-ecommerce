@@ -13,11 +13,13 @@ from slumber.exceptions import SlumberBaseException
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, SEAT_PRODUCT_CLASS_NAME
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.coupons.views import get_voucher_and_products_from_code
+from ecommerce.courses.models import Course
 from ecommerce.courses.utils import get_certificate_type_display_value, get_course_info_from_lms, mode_for_seat
 from ecommerce.extensions.analytics.utils import prepare_analytics_data
 from ecommerce.extensions.basket.utils import prepare_basket, get_basket_switch_data
 from ecommerce.extensions.offer.utils import format_benefit_value
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
+
 
 Benefit = get_model('offer', 'Benefit')
 logger = logging.getLogger(__name__)
@@ -102,27 +104,37 @@ class BasketSummaryView(BasketView):
 
         for line in lines:
             course_key = CourseKey.from_string(line.product.attr.course_key)
+            try:
+                ecommerce_name = Course.objects.get(id=course_key).name
+            except Course.DoesNotExist:
+                ecommerce_name = None
+                logger.exception('Course with key %s does not exist.', course_key)
+
             course_name = None
             image_url = None
             short_description = None
             try:
                 course = get_course_info_from_lms(course_key)
-                image_url = get_lms_url(course['media']['course_image']['uri'])
-                short_description = course['short_description']
+                try:
+                    image_url = course['media']['image']['raw']
+                except (KeyError, TypeError):
+                    image_url = ''
+                short_description = course.get('short_description', '')
                 course_name = course['name']
             except (ConnectionError, SlumberBaseException, Timeout):
                 logger.exception('Failed to retrieve data from Course API for course [%s].', course_key)
 
-            # Set to true if any course in basket has bulk purchase scenario
-            if line.product.get_product_class().name == ENROLLMENT_CODE_PRODUCT_CLASS_NAME:
-                is_bulk_purchase = True
-                # Iterate on message storage so all messages are marked as read
-                list(messages.get_messages(self.request))
+            if self.request.site.siteconfiguration.enable_enrollment_codes:
+                # Get variables for the switch link that toggles from enrollment codes and seat.
+                switch_link_text, partner_sku = get_basket_switch_data(line.product)
+                if line.product.get_product_class().name == ENROLLMENT_CODE_PRODUCT_CLASS_NAME:
+                    is_bulk_purchase = True
+                    # Iterate on message storage so all messages are marked as read.
+                    # This will hide the success messages when a user updates the quantity
+                    # for an item in the basket.
+                    list(messages.get_messages(self.request))
 
-            # Get variables for alternative basket view
-            switch_link_text, partner_sku = get_basket_switch_data(line.product)
-
-            if line.has_discount:
+            if line.has_discount and line.discount_value > 0:
                 benefit = self.request.basket.applied_offers().values()[0].benefit
                 benefit_value = format_benefit_value(benefit)
             else:
@@ -132,6 +144,7 @@ class BasketSummaryView(BasketView):
                 'seat_type': self._determine_seat_type(line.product),
                 'course_name': course_name,
                 'course_key': course_key,
+                'ecommerce_name': ecommerce_name,
                 'image_url': image_url,
                 'course_short_description': short_description,
                 'benefit_value': benefit_value,

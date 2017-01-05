@@ -20,7 +20,7 @@
                     <div class="basket-items">
                         {% if line_data.seat_type %}
                         <p class="certificate_type">
-                            {% trans "Earn a valuable certificate to showcase the skills you learn in" %}
+                            {% trans "Complete your enrollment" %}
                         </p>
                         {% endif %}
                         <div class="row">
@@ -29,7 +29,7 @@
                                 <img class="thumbnail" src="{{ line_data.image_url }}" alt="{{ line_data.course_name }}"/>
                             </div>
                             <div class="col-md-5 col-sm-12">
-                                <p class="course_name">{{ line_data.course_name }} - {{ line_data.course_key.org }} ({{ line_data.course_key.run }})</p>
+                                <p class="course_name">{{ line_data.ecommerce_name }} - {{ line_data.course_key.org }}</p>
                                 <p class="course_description">{{ line_data.course_short_description }}</p>
                             </div>
                             {% if line_data.enrollment_code %}
@@ -56,7 +56,7 @@
                                     <label class="course-price-label text-muted">{% trans 'Price' %}</label>
                                 {% endif %}
 
-                                {% if line_data.line.has_discount %}
+                                {% if line_data.line.has_discount and line_data.benefit_value %}
                                     <div class="discount">
                                         <div class="benefit">
                                             {% blocktrans with benefit_value=line_data.benefit_value %}
@@ -91,7 +91,6 @@
                                 {% endblocktrans %}
                                 <form action="{% url 'basket:vouchers-remove' pk=voucher.id %}" method="POST">
                                     {% csrf_token %}
-                                    <button class="remove-voucher" type="submit"><i class="fa fa-times"></i></button>
                                 </form>
                                 </p>
                             {% endfor %}
@@ -153,42 +152,21 @@
                     </a>
                     {% else %}
                         {% for processor in payment_processors %}
-                            <button data-track-type="click"
-                                    data-track-event="edx.bi.ecommerce.basket.payment_selected"
-                                    data-track-category="checkout"
-                                    data-processor-name="{{ processor.NAME }}"
-                                    data-course-id="{{ course.id }}"
-                                    class="btn payment-button"
-                                    value="{{ processor.NAME|lower }}"
-                                    id="{{ processor.NAME|lower }}">
-                                {% if processor.NAME == 'cybersource' %}
-                                    {% trans "Checkout" %}
-                                {% elif processor.NAME == 'paypal' %}
-                                    {# Translators: Do NOT translate the name PayPal. #}
-                                    {% trans "Checkout with PayPal" %}
-                                {% endif %}
-                            </button>
+                            {% if processor.NAME == 'cybersource' %}
+                                <button data-track-type="click"
+                                        data-track-event="edx.bi.ecommerce.basket.payment_selected"
+                                        data-track-category="checkout"
+                                        data-processor-name="{{ processor.NAME }}"
+                                        data-course-id="{{ course.id }}"
+                                        class="btn payment-button"
+                                        value="{{ processor.NAME|lower }}"
+                                        id="{{ processor.NAME|lower }}">
+                                        {% trans "Checkout" %}
+                                </button>
+                            {% endif %}
                         {% endfor %}
                     {% endif %}
                 </div>
-            </div>
-        </div>
-
-        <div class="row verification-note">
-            <div class="col-sm-12">
-                <span><i class="fa fa-exclamation-circle"></i></span>
-                {# Translators: <b></b> tags will bold the text within. Keep the tags and translate the text within. #}
-                {% if is_verification_required %}
-                    {% trans "<b>Note:</b> To earn a verified certificate, you must verify your identity with a <b>webcam</b> and a <b>government-issued photo ID</b>. " %}
-                {% else %}
-                    {% trans "<b>Note:</b> To complete your enrollment, select Checkout or Checkout with PayPal." %}
-                {% endif %}
-            </div>
-        </div>
-        <div class="row help">
-            <div class="col-sm-12">
-                <p><b>{% trans "Have questions?" %}</b></p>
-                <a href="{{ support_url }}">{% trans "Please read our FAQs to view common questions about our certificates." %}</a>
             </div>
         </div>
     </div>

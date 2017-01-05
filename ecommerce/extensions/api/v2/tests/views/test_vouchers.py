@@ -76,6 +76,7 @@ class VoucherViewSetTests(CourseCatalogMockMixin, CourseCatalogTestMixin, TestCa
         course2, seat2 = self.create_course_and_seat()
         course_run_info = {
             'count': 2,
+            'next': 'path/to/the/next/page',
             'results': [{
                 'key': course1.id,
                 'title': course1.name,
@@ -103,11 +104,11 @@ class VoucherViewSetTests(CourseCatalogMockMixin, CourseCatalogTestMixin, TestCa
         request = factory.get('/?code={}&page_size=6'.format(voucher.code))
         request.site = self.site
         request.strategy = DefaultStrategy()
-        offers = VoucherViewSet().get_offers(products=products, request=request, voucher=voucher)
+        offers = VoucherViewSet().get_offers(products=products, request=request, voucher=voucher)['results']
         self.assertEqual(len(offers), 2)
 
         products[1].expires = pytz.utc.localize(datetime.datetime.min)
-        offers = VoucherViewSet().get_offers(products=products, request=request, voucher=voucher)
+        offers = VoucherViewSet().get_offers(products=products, request=request, voucher=voucher)['results']
         self.assertEqual(len(offers), 1)
 
 
@@ -235,7 +236,7 @@ class VoucherViewOffersEndpointTests(
         request = self.prepare_offers_listing_request(voucher.code)
 
         with mock.patch(method, mock.Mock(return_value=return_value)):
-            offers = VoucherViewSet().get_offers(products=products, request=request, voucher=voucher)
+            offers = VoucherViewSet().get_offers(products=products, request=request, voucher=voucher)['results']
             self.assertEqual(len(offers), 0)
 
     @mock_course_catalog_api_client
@@ -263,7 +264,7 @@ class VoucherViewOffersEndpointTests(
         benefit = voucher.offers.first().benefit
         request = self.prepare_offers_listing_request(voucher.code)
         self.mock_course_api_response(course=course)
-        offers = VoucherViewSet().get_offers(products=products, request=request, voucher=voucher)
+        offers = VoucherViewSet().get_offers(products=products, request=request, voucher=voucher)['results']
         first_offer = offers[0]
 
         self.assertEqual(len(offers), 1)
@@ -294,9 +295,8 @@ class VoucherViewOffersEndpointTests(
         voucher, products = get_voucher_and_products_from_code(voucher.code)
         benefit = voucher.offers.first().benefit
         request = self.prepare_offers_listing_request(voucher.code)
-        offers = VoucherViewSet().get_offers(products=products, request=request, voucher=voucher)
+        offers = VoucherViewSet().get_offers(products=products, request=request, voucher=voucher)['results']
         first_offer = offers[0]
-
         self.assertEqual(len(offers), 1)
         self.assertDictEqual(first_offer, {
             'benefit': {
@@ -351,3 +351,25 @@ class VoucherViewOffersEndpointTests(
             'title': course.name,
             'voucher_end_date': voucher.end_datetime
         })
+
+    def test_get_course_offer_verify_null_fields(self):
+        """ Verify that the course offers data is properly formatted. """
+        benefit = BenefitFactory()
+        course, seat = self.create_course_and_seat()
+        course_info = {
+            'start': None,
+            'image': None,
+        }
+        stock_record = seat.stockrecords.first()
+        voucher = VoucherFactory()
+        offer = VoucherViewSet().get_course_offer_data(
+            benefit=benefit,
+            course=course,
+            course_info=course_info,
+            is_verified=True,
+            stock_record=stock_record,
+            voucher=voucher
+        )
+
+        self.assertEqual(offer['image_url'], '')
+        self.assertEqual(offer['course_start_date'], None)

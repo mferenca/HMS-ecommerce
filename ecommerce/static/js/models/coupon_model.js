@@ -107,6 +107,7 @@ define([
                         return Backbone.Validation.messages.seat_types;
                     }
                 },
+                email_domains: {required: false},
                 start_date: function (val) {
                     var startDate,
                         endDate;
@@ -142,7 +143,6 @@ define([
             initialize: function () {
                 this.on('change:categories', this.updateCategory, this);
                 this.on('change:voucher_type', this.changeVoucherType, this);
-                this.on('change:vouchers', this.updateVoucherData);
                 this.on('change:seats', this.updateSeatData);
                 this.on('change:quantity', this.updateTotalValue(this.getSeatPrice));
                 this.on('change:payment_information', this.updatePaymentInformation);
@@ -203,29 +203,6 @@ define([
                 }
             },
 
-            updateVoucherData: function () {
-                var vouchers = this.get('vouchers'),
-                    voucher = vouchers[0],
-                    code_count = _.findWhere(voucher, {'code': voucher.code});
-                this.set('start_date', voucher.start_datetime);
-                this.set('end_date', voucher.end_datetime);
-                this.set('voucher_type', voucher.usage);
-                this.set('quantity', _.size(vouchers));
-                this.updateTotalValue(this.getSeatPrice());
-                if (this.get('coupon_type') === 'Discount code') {
-                    this.set('benefit_type', voucher.benefit.type);
-                    this.set('benefit_value', voucher.benefit.value);
-                }
-
-                if (code_count > 1 || _.size(vouchers) === 1) {
-                    this.set('code', voucher.code);
-                }
-
-                if (voucher.usage === 'Single use') {
-                    this.set('max_uses', 1);
-                }
-            },
-
             updatePaymentInformation: function() {
                 var payment_information = this.get('payment_information'),
                     invoice = payment_information.Invoice,
@@ -242,6 +219,9 @@ define([
             },
 
             save: function (attributes, options) {
+                // Remove all saved models from store, which prevents Duplicate id errors
+                Backbone.Relational.store.reset();
+
                 _.defaults(options || (options = {}), {
                     // The API requires a CSRF token for all POST requests using session authentication.
                     headers: {'X-CSRFToken': Cookies.get('ecommerce_csrftoken')},
@@ -249,8 +229,8 @@ define([
                 });
 
                 if (!options.patch){
-                    this.set('start_date', moment.utc(this.get('start_date')));
-                    this.set('end_date', moment.utc(this.get('end_date')));
+                    this.set('start_datetime', moment.utc(this.get('start_date')));
+                    this.set('end_datetime', moment.utc(this.get('end_date')));
 
                     if (this.get('coupon_type') === 'Enrollment code') {
                         this.set('benefit_type', 'Percentage');
@@ -260,11 +240,15 @@ define([
                     options.data = JSON.stringify(this.toJSON());
                 } else {
                     if (_.has(attributes, 'start_date')) {
-                        attributes.start_date = moment.utc(attributes.start_date);
+                        attributes.start_datetime = moment.utc(attributes.start_date);
                     }
 
                     if (_.has(attributes, 'end_date')) {
-                        attributes.end_date = moment.utc(attributes.end_date);
+                        attributes.end_datetime = moment.utc(attributes.end_date);
+                    }
+
+                    if (_.has(attributes, 'title')) {
+                        attributes.name = attributes.title;
                     }
                 }
 

@@ -19,7 +19,9 @@
   border-radius: 0;
 
   // Add our own border
-  border-bottom: $navbar-border-bottom-width solid palette(primary, accent);
+  .container {
+    border-bottom: $navbar-border-bottom-width solid palette(secondary, accent);
+  }
 
   // Vertically center the logo
   .navbar-brand {
@@ -45,32 +47,34 @@
 }
 
 .administration-navbar {
+  margin-top: 10px;
   padding: 10px;
-  border-bottom: 2px solid #cacaca;
-
-  background-color: #f6f6f6;
   height: 50px;
 
-  font-size: 18px;
-  font-weight: 600;
-
-  .container {
-    background-color: #f6f6f6;
-  }
-
   div a {
-    padding: 10px;
+    transition: all 0.1s linear 0s;
+
+    margin-right: 20px;
+    padding: 13px 13px 15px;
     border-bottom: none;
 
-    color: #0ea6ec;
+    color: rgb(140, 129, 121);
+    font-family: "AvenirLTStd-Book", sans-serif;
+    text-transform: uppercase;
 
     &.selected,
     &:active,
     &:focus,
     &:hover {
-      border-bottom: 4px solid #0ea6ec;
+      border-radius: 3px;
+      background-color: rgb(246, 246, 246);
+      color: $brand-secondary-accent;
+      font-weight: bold;
+    }
 
-      color: black;
+    &:hover:not(.selected) {
+      color: #333;
+      font-weight: normal;
     }
   }
 }

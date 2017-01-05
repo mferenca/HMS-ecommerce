@@ -6,6 +6,7 @@ import logging
 
 from dateutil.parser import parse
 from django.db import transaction
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
 from oscar.core.loading import get_model, get_class
@@ -14,9 +15,9 @@ from rest_framework.reverse import reverse
 import waffle
 
 from ecommerce.core.constants import ISO_8601_FORMAT, COURSE_ID_REGEX
+from ecommerce.core.models import Site, SiteConfiguration
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.courses.models import Course
-from ecommerce.coupons.utils import get_seats_from_query
 from ecommerce.invoice.models import Invoice
 
 logger = logging.getLogger(__name__)
@@ -299,6 +300,8 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
 
                     # Extract arguments required for Seat creation, deserializing as necessary.
                     certificate_type = attrs.get('certificate_type', '')
+                    create_enrollment_code = product['course'].get('create_enrollment_code') and \
+                        self.context['request'].site.siteconfiguration.enable_enrollment_codes
                     id_verification_required = attrs['id_verification_required']
                     price = Decimal(product['price'])
 
@@ -317,6 +320,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
                         expires=expires,
                         credit_provider=credit_provider,
                         credit_hours=credit_hours,
+                        create_enrollment_code=create_enrollment_code
                     )
 
                 resp_message = course.publish_to_lms(access_token=self.access_token)
@@ -425,56 +429,100 @@ class CouponListSerializer(serializers.ModelSerializer):
 
 class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     """ Serializer for Coupons. """
+    benefit_type = serializers.SerializerMethodField()
+    benefit_value = serializers.SerializerMethodField()
     coupon_type = serializers.SerializerMethodField()
-    last_edited = serializers.SerializerMethodField()
-    seats = serializers.SerializerMethodField()
-    client = serializers.SerializerMethodField()
-    vouchers = serializers.SerializerMethodField()
-    categories = CategorySerializer(many=True, read_only=True)
-    note = serializers.SerializerMethodField()
-    max_uses = serializers.SerializerMethodField()
-    num_uses = serializers.SerializerMethodField()
     catalog_query = serializers.SerializerMethodField()
+    categories = CategorySerializer(many=True, read_only=True)
+    client = serializers.SerializerMethodField()
+    code = serializers.SerializerMethodField()
+    code_status = serializers.SerializerMethodField()
     course_seat_types = serializers.SerializerMethodField()
+    end_date = serializers.SerializerMethodField()
+    last_edited = serializers.SerializerMethodField()
+    max_uses = serializers.SerializerMethodField()
+    note = serializers.SerializerMethodField()
+    num_uses = serializers.SerializerMethodField()
     payment_information = serializers.SerializerMethodField()
+    quantity = serializers.SerializerMethodField()
+    start_date = serializers.SerializerMethodField()
+    voucher_type = serializers.SerializerMethodField()
+    seats = serializers.SerializerMethodField()
+    email_domains = serializers.SerializerMethodField()
+
+    def retrieve_benefit(self, obj):
+        """Helper method to retrieve the benefit from voucher. """
+        return self.retrieve_voucher(obj).benefit
+
+    def retrieve_end_date(self, obj):
+        """Helper method to retrieve the voucher end datetime. """
+        return self.retrieve_voucher(obj).end_datetime
 
     def retrieve_offer(self, obj):
         """Helper method to retrieve the offer from coupon. """
-        return obj.attr.coupon_vouchers.vouchers.first().offers.first()
+        return self.retrieve_voucher(obj).offers.first()
+
+    def retrieve_start_date(self, obj):
+        """Helper method to retrieve the voucher start datetime. """
+        return self.retrieve_voucher(obj).start_datetime
+
+    def retrieve_voucher(self, obj):
+        """Helper method to retrieve the first voucher from coupon. """
+        return obj.attr.coupon_vouchers.vouchers.first()
+
+    def retrieve_voucher_usage(self, obj):
+        """Helper method to retrieve usage from voucher. """
+        return self.retrieve_voucher(obj).usage
+
+    def retrieve_quantity(self, obj):
+        """Helper method to retrieve number from vouchers. """
+        return obj.attr.coupon_vouchers.vouchers.count()
+
+    def get_benefit_type(self, obj):
+        return self.retrieve_benefit(obj).type
+
+    def get_benefit_value(self, obj):
+        return self.retrieve_benefit(obj).value
 
     def get_coupon_type(self, obj):
+        benefit = self.retrieve_benefit(obj)
+        if benefit.type == Benefit.PERCENTAGE and benefit.value == 100:
+            return _('Enrollment code')
+        return _('Discount code')
+
+    def get_catalog_query(self, obj):
         offer = self.retrieve_offer(obj)
-        if offer.benefit.type == Benefit.PERCENTAGE and offer.benefit.value == 100:
-            return 'Enrollment code'
-        return 'Discount code'
+        return offer.condition.range.catalog_query
+
+    def get_client(self, obj):
+        return Invoice.objects.get(order__basket__lines__product=obj).business_client.name
+
+    def get_code(self, obj):
+        if self.retrieve_quantity(obj) == 1:
+            return self.retrieve_voucher(obj).code
+
+    def get_code_status(self, obj):
+        start_date = self.retrieve_start_date(obj)
+        end_date = self.retrieve_end_date(obj)
+        current_datetime = timezone.now()
+        in_time_interval = (start_date < current_datetime) and (end_date > current_datetime)
+        return _('ACTIVE') if in_time_interval else _('INACTIVE')
+
+    def get_course_seat_types(self, obj):
+        offer = self.retrieve_offer(obj)
+        course_seat_types = offer.condition.range.course_seat_types
+        return course_seat_types.split(',') if course_seat_types else course_seat_types
+
+    def get_end_date(self, obj):
+        return self.retrieve_end_date(obj)
 
     def get_last_edited(self, obj):
         history = obj.history.latest()
         return history.history_user.username, history.history_date
 
-    def get_seats(self, obj):
+    def get_max_uses(self, obj):
         offer = self.retrieve_offer(obj)
-        _range = offer.condition.range
-        request = self.context['request']
-        if _range.catalog:
-            stockrecords = _range.catalog.stock_records.all()
-            seats = Product.objects.filter(id__in=[sr.product.id for sr in stockrecords])
-        else:
-            seats = get_seats_from_query(
-                request.site,
-                _range.catalog_query,
-                _range.course_seat_types
-            )
-        serializer = ProductSerializer(seats, many=True, context={'request': request})
-        return serializer.data
-
-    def get_client(self, obj):
-        return Invoice.objects.get(order__basket__lines__product=obj).business_client.name
-
-    def get_vouchers(self, obj):
-        vouchers = obj.attr.coupon_vouchers.vouchers.all()
-        serializer = VoucherSerializer(vouchers, many=True, context={'request': self.context['request']})
-        return serializer.data
+        return offer.max_global_applications
 
     def get_note(self, obj):
         try:
@@ -482,22 +530,13 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
         except AttributeError:
             return None
 
-    def get_max_uses(self, obj):
-        offer = self.retrieve_offer(obj)
-        return offer.max_global_applications
-
     def get_num_uses(self, obj):
         offer = self.retrieve_offer(obj)
         return offer.num_applications
 
-    def get_catalog_query(self, obj):
+    def get_email_domains(self, obj):
         offer = self.retrieve_offer(obj)
-        return offer.condition.range.catalog_query
-
-    def get_course_seat_types(self, obj):
-        offer = self.retrieve_offer(obj)
-        course_seat_types = offer.condition.range.course_seat_types
-        return course_seat_types.split(',') if course_seat_types else course_seat_types
+        return offer.email_domains
 
     def get_payment_information(self, obj):
         """
@@ -509,12 +548,35 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
         response = {'Invoice': InvoiceSerializer(invoice).data}
         return response
 
+    def get_quantity(self, obj):
+        return self.retrieve_quantity(obj)
+
+    def get_start_date(self, obj):
+        return self.retrieve_start_date(obj)
+
+    def get_voucher_type(self, obj):
+        return self.retrieve_voucher_usage(obj)
+
+    def get_seats(self, obj):
+        offer = self.retrieve_offer(obj)
+        _range = offer.condition.range
+        request = self.context['request']
+        if _range.catalog:
+            stockrecords = _range.catalog.stock_records.all()
+            seats = Product.objects.filter(id__in=[sr.product.id for sr in stockrecords])
+            serializer = ProductSerializer(seats, many=True, context={'request': request})
+            return serializer.data
+        else:
+            return None
+
     class Meta(object):
         model = Product
         fields = (
-            'id', 'title', 'coupon_type', 'last_edited', 'seats', 'client',
-            'price', 'vouchers', 'categories', 'note', 'max_uses', 'num_uses',
-            'catalog_query', 'course_seat_types', 'payment_information'
+            'benefit_type', 'benefit_value', 'catalog_query',
+            'categories', 'client', 'code', 'code_status', 'coupon_type',
+            'course_seat_types', 'end_date', 'id', 'last_edited', 'max_uses',
+            'note', 'num_uses', 'payment_information', 'price', 'quantity',
+            'start_date', 'title', 'voucher_type', 'seats', 'email_domains'
         )
 
 
@@ -530,3 +592,15 @@ class CheckoutSerializer(serializers.Serializer):  # pylint: disable=abstract-me
 class InvoiceSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = Invoice
+
+
+class SiteSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = Site
+
+
+class SiteConfigurationSerializer(serializers.ModelSerializer):
+    site = SiteSerializer(read_only=True)
+
+    class Meta(object):
+        model = SiteConfiguration

@@ -9,7 +9,6 @@ from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from rest_framework.response import Response
 
 from ecommerce.extensions.api import serializers
-from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.filters import OrderFilter
 from ecommerce.extensions.api.permissions import IsStaffOrOwner
 from ecommerce.extensions.api.throttles import ServiceUserThrottle
@@ -21,7 +20,7 @@ Order = get_model('order', 'Order')
 
 
 class OrderViewSet(viewsets.ReadOnlyModelViewSet):
-    lookup_field = AC.KEYS.ORDER_NUMBER
+    lookup_field = 'number'
     permission_classes = (IsAuthenticated, IsStaffOrOwner, DjangoModelPermissions,)
     queryset = Order.objects.all()
     serializer_class = serializers.OrderSerializer
@@ -54,7 +53,7 @@ class OrderViewSet(viewsets.ReadOnlyModelViewSet):
 
         logger.info('Attempting fulfillment of order [%s]...', order.number)
         post_checkout = get_class('checkout.signals', 'post_checkout')
-        post_checkout.send(sender=post_checkout, order=order)
+        post_checkout.send(sender=post_checkout, order=order, request=request)
 
         if order.is_fulfillable:
             logger.warning('Fulfillment of order [%s] failed!', order.number)

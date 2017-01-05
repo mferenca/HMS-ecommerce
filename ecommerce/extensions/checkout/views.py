@@ -8,7 +8,8 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.utils.decorators import method_decorator
-from django.views.generic import RedirectView
+from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import RedirectView, TemplateView
 from oscar.apps.checkout.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
 from oscar.core.loading import get_class, get_model
 
@@ -52,3 +53,60 @@ class FreeCheckoutView(EdxOrderPlacementMixin, RedirectView):
             # page which displays the appropriate message for empty baskets.
             url = reverse('basket:summary')
         return url
+
+
+class CancelCheckoutView(TemplateView):
+    """
+    Displays a cancellation message when the customer cancels checkout on the
+    payment processor page.
+    """
+
+    template_name = 'checkout/cancel_checkout.html'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, *args, **kwargs):
+        """
+        Request needs to be csrf_exempt to handle POST back from external payment processor.
+        """
+        return super(CancelCheckoutView, self).dispatch(*args, **kwargs)
+
+    def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument
+        """
+        Allow POST responses from payment processors and just render the cancel page..
+        """
+        context = self.get_context_data(**kwargs)
+        return self.render_to_response(context)
+
+    def get_context_data(self, **kwargs):
+        context = super(CancelCheckoutView, self).get_context_data(**kwargs)
+        context.update({
+            'payment_support_email': self.request.site.siteconfiguration.payment_support_email,
+        })
+        return context
+
+
+class CheckoutErrorView(TemplateView):
+    """ Displays an error page when checkout does not complete successfully. """
+
+    template_name = 'checkout/error.html'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, *args, **kwargs):
+        """
+        Request needs to be csrf_exempt to handle POST back from external payment processor.
+        """
+        return super(CheckoutErrorView, self).dispatch(*args, **kwargs)
+
+    def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument
+        """
+        Allow POST responses from payment processors and just render the error page.
+        """
+        context = self.get_context_data(**kwargs)
+        return self.render_to_response(context)
+
+    def get_context_data(self, **kwargs):
+        context = super(CheckoutErrorView, self).get_context_data(**kwargs)
+        context.update({
+            'payment_support_email': self.request.site.siteconfiguration.payment_support_email,
+        })
+        return context

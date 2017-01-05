@@ -11,11 +11,12 @@ from rest_framework_extensions.mixins import NestedViewSetMixin
 from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.constants import DEFAULT_CATALOG_PAGE_SIZE
-from ecommerce.courses.models import Course
+from ecommerce.coupons.utils import get_range_catalog_query_results
 from ecommerce.extensions.api import serializers
 
 
 Catalog = get_model('catalogue', 'Catalog')
+Product = get_model('catalogue', 'Product')
 logger = logging.getLogger(__name__)
 
 
@@ -40,19 +41,34 @@ class CatalogViewSet(NestedViewSetMixin, ReadOnlyModelViewSet):
         """
         query = request.GET.get('query')
         seat_types = request.GET.get('seat_types')
+        offset = request.GET.get('offset')
+        limit = request.GET.get('limit', DEFAULT_CATALOG_PAGE_SIZE)
+
         if query and seat_types:
             seat_types = seat_types.split(',')
             try:
-                client = request.site.siteconfiguration.course_catalog_api_client
-                results = client.course_runs.get(q=query, page_size=DEFAULT_CATALOG_PAGE_SIZE,
-                                                 limit=DEFAULT_CATALOG_PAGE_SIZE)['results']
+                response = get_range_catalog_query_results(
+                    limit=limit,
+                    query=query,
+                    site=request.site,
+                    offset=offset
+                )
+                results = response['results']
                 course_ids = [result['key'] for result in results]
-                courses = serializers.CourseSerializer(
-                    Course.objects.filter(id__in=course_ids),
+                seats = serializers.ProductSerializer(
+                    Product.objects.filter(
+                        course_id__in=course_ids,
+                        attributes__name='certificate_type',
+                        attribute_values__value_text__in=seat_types
+                    ),
                     many=True,
                     context={'request': request}
                 ).data
-                return Response(data=[course for course in courses if course['type'] in seat_types])
+                data = {
+                    'next': response['next'],
+                    'seats': seats
+                }
+                return Response(data=data)
             except (ConnectionError, SlumberBaseException, Timeout):
                 logger.error('Unable to connect to Course Catalog service.')
                 return Response(status=status.HTTP_400_BAD_REQUEST)

@@ -77,44 +77,67 @@ def _get_discount_info(discount_data):
 
 
 def _get_info_for_coupon_report(coupon, voucher):
-    offer = voucher.offers.all().first()
+    history = coupon.history.first()
+    author = history.history_user.full_name
+    category_name = ProductCategory.objects.get(product=coupon).category.name
+
+    try:
+        note = coupon.attr.note
+    except AttributeError:
+        note = ''
+
+    offer = voucher.offers.first()
     if offer.condition.range.catalog:
+        seat_stockrecord = offer.condition.range.catalog.stock_records.first()
         coupon_stockrecord = StockRecord.objects.get(product=coupon)
         invoiced_amount = currency(coupon_stockrecord.price_excl_tax)
-        seat_stockrecord = offer.condition.range.catalog.stock_records.first()
         course_id = seat_stockrecord.product.attr.course_key
         course_organization = CourseKey.from_string(course_id).org
         price = currency(seat_stockrecord.price_excl_tax)
         discount_data = get_voucher_discount_info(offer.benefit, seat_stockrecord.price_excl_tax)
+        coupon_type, discount_percentage, discount_amount = _get_discount_info(discount_data)
     else:
         # Note (multi-courses): Need to account for multiple seats.
         catalog_query = offer.condition.range.catalog_query
         course_seat_types = offer.condition.range.course_seat_types
         course_id = None
-        coupon_stockrecord = None
         invoiced_amount = None
-        seat_stockrecord = None
         course_organization = None
         price = None
-        discount_data = None
+        coupon_type, discount_percentage, discount_amount = None, None, None
 
-    history = coupon.history.first()
-    coupon_type, discount_percentage, discount_amount = _get_discount_info(discount_data)
+    coupon_data = {
+        'Code': 'This row applies to all vouchers',
+        'Category': category_name,
+        'Coupon Expiry Date': voucher.end_datetime.strftime("%b %d, %y"),
+        'Coupon Name': voucher.name,
+        'Coupon Start Date': voucher.start_datetime.strftime("%b %d, %y"),
+        'Coupon Type': coupon_type,
+        'Created By': author,
+        'Create Date': history.history_date.strftime("%b %d, %y"),
+        'Discount Percentage': discount_percentage,
+        'Discount Amount': discount_amount,
+        'Email Domains': offer.email_domains,
+        'Invoiced Amount': invoiced_amount,
+        'Note': note,
+        'Price': price
+    }
+
+    if course_id:
+        coupon_data['Course ID'] = course_id
+        coupon_data['Organization'] = course_organization
+    else:
+        coupon_data['Catalog Query'] = catalog_query
+        coupon_data['Course Seat Types'] = course_seat_types
+
+    return coupon_data
+
+
+def _get_voucher_info_for_coupon_report(voucher):
+    offer = voucher.offers.first()
     status = _get_voucher_status(voucher, offer)
     path = '{path}?code={code}'.format(path=reverse('coupons:offer'), code=voucher.code)
     url = get_ecommerce_url(path)
-    author = history.history_user.full_name.encode('utf8')
-
-    try:
-        note = coupon.attr.note.encode('utf8')
-    except AttributeError:
-        note = ''
-
-    product_categories = ProductCategory.objects.filter(product=coupon)
-    if product_categories:
-        category_names = ', '.join([pc.category.name for pc in product_categories])
-    else:
-        category_names = ''
 
     # Set the max_uses_count for single-use vouchers to 1,
     # for other usage limitations (once per customer and multi-use)
@@ -131,31 +154,12 @@ def _get_info_for_coupon_report(coupon, voucher):
         max_uses_count = offer.max_global_applications
 
     coupon_data = {
-        'Coupon Name': voucher.name.encode('utf8'),
         'Code': voucher.code,
-        'Coupon Type': coupon_type,
-        'URL': url,
-        'Category': category_names,
-        'Note': note,
-        'Price': price,
-        'Invoiced Amount': invoiced_amount,
-        'Discount Percentage': discount_percentage,
-        'Discount Amount': discount_amount,
-        'Status': status,
-        'Created By': author,
-        'Create Date': history.history_date.strftime("%b %d, %y"),
-        'Coupon Start Date': voucher.start_datetime.strftime("%b %d, %y"),
-        'Coupon Expiry Date': voucher.end_datetime.strftime("%b %d, %y"),
         'Maximum Coupon Usage': max_uses_count,
         'Redemption Count': redemption_count,
+        'Status': status,
+        'URL': url
     }
-
-    if course_id:
-        coupon_data['Course ID'] = course_id
-        coupon_data['Organization'] = course_organization
-    else:
-        coupon_data['Catalog Query'] = catalog_query
-        coupon_data['Course Seat Types'] = course_seat_types
 
     return coupon_data
 
@@ -173,8 +177,8 @@ def generate_coupon_report(coupon_vouchers):
     """
 
     field_names = [
-        _('Coupon Name'),
         _('Code'),
+        _('Coupon Name'),
         _('Maximum Coupon Usage'),
         _('Redemption Count'),
         _('Coupon Type'),
@@ -198,30 +202,33 @@ def generate_coupon_report(coupon_vouchers):
         _('Create Date'),
         _('Coupon Start Date'),
         _('Coupon Expiry Date'),
+        _('Email Domains'),
     ]
     rows = []
 
     for coupon_voucher in coupon_vouchers:
         coupon = coupon_voucher.coupon
         client = Invoice.objects.get(order__basket__lines__product=coupon).business_client.name
+        rows.append(_get_info_for_coupon_report(coupon, coupon_voucher.vouchers.first()))
+        rows[0]['Client'] = client
 
-        for voucher in coupon_voucher.vouchers.all():
-            row = _get_info_for_coupon_report(coupon, voucher)
+        for voucher in coupon_voucher.vouchers.all().prefetch_related('offers'):
+            row = _get_voucher_info_for_coupon_report(voucher)
 
             for item in ('Order Number', 'Redeemed By Username',):
                 row[item] = ''
 
-            row['Client'] = client.encode('utf8')
             rows.append(row)
             if voucher.num_orders > 0:
-                voucher_applications = VoucherApplication.objects.filter(voucher=voucher)
+                voucher_applications = VoucherApplication.objects.filter(
+                    voucher=voucher).prefetch_related('user', 'order__lines')
                 for application in voucher_applications:
                     redemption_user_username = application.user.username
                     redemption_course_id = application.order.lines.first().product.course_id
 
                     new_row = row.copy()
 
-                    if 'Catalog Query' in new_row:
+                    if 'Catalog Query' in rows[0]:
                         new_row['Redeemed For Course ID'] = redemption_course_id
 
                     new_row.update({
@@ -246,7 +253,8 @@ def generate_coupon_report(coupon_vouchers):
 
 
 def _get_or_create_offer(
-        product_range, benefit_type, benefit_value, coupon_id=None, max_uses=None, offer_number=None
+        product_range, benefit_type, benefit_value, coupon_id=None,
+        max_uses=None, offer_number=None, email_domains=None
 ):
     """
     Return an offer for a catalog with condition and benefit.
@@ -258,6 +266,13 @@ def _get_or_create_offer(
         product_range (Range): Range of products associated with condition
         benefit_type (str): Type of benefit associated with the offer
         benefit_value (Decimal): Value of benefit associated with the offer
+    Kwargs:
+        coupon_id (int): ID of the coupon
+        max_uses (int): number of maximum global application number an offer can have
+        offer_number (int): number of the consecutive offer - used in case of a multiple
+                            multi-use coupon
+        email_domains (str): a comma-separated string of email domains allowed to apply
+                            this offer
 
     Returns:
         Offer
@@ -283,7 +298,8 @@ def _get_or_create_offer(
         offer_type=ConditionalOffer.VOUCHER,
         condition=offer_condition,
         benefit=offer_benefit,
-        max_global_applications=max_uses
+        max_global_applications=max_uses,
+        email_domains=email_domains
     )
 
     return offer
@@ -363,7 +379,8 @@ def create_vouchers(
         max_uses=None,
         _range=None,
         catalog_query=None,
-        course_seat_types=None):
+        course_seat_types=None,
+        email_domains=None):
     """
     Create vouchers.
 
@@ -379,6 +396,7 @@ def create_vouchers(
             start_datetime (datetime): Start date for voucher offer.
             voucher_type (str): Type of voucher.
             code (str): Code associated with vouchers. Defaults to None.
+            email_domains (str): List of email domains to restrict coupons. Defaults to None.
 
     Returns:
             List[Voucher]
@@ -398,13 +416,13 @@ def create_vouchers(
             name=range_name,
             catalog=catalog,
             catalog_query=catalog_query,
-            course_seat_types=course_seat_types
+            course_seat_types=course_seat_types,
         )
 
     # In case of more than 1 multi-usage coupon, each voucher needs to have an individual
     # offer because the usage is tied to the offer so that a usage on one voucher would
     # mean all vouchers will have their usage decreased by one, hence each voucher needs
-    # it's own offer to keep track of it's own usages without interfering with others.
+    # its own offer to keep track of its own usages without interfering with others.
     multi_offer = True if quantity > 1 and max_uses > 1 else False
     num_of_offers = quantity if multi_offer else 1
     for num in range(num_of_offers):
@@ -414,7 +432,8 @@ def create_vouchers(
             benefit_value=benefit_value,
             max_uses=max_uses,
             coupon_id=coupon.id,
-            offer_number=num
+            offer_number=num,
+            email_domains=email_domains
         )
         offers.append(offer)
 
@@ -475,7 +494,7 @@ def get_voucher_discount_info(benefit, price):
         }
 
 
-def update_voucher_offer(offer, benefit_value, benefit_type, coupon, max_uses=None):
+def update_voucher_offer(offer, benefit_value, benefit_type, coupon, max_uses=None, email_domains=None):
     """
     Update voucher offer with new benefit value.
 
@@ -483,6 +502,12 @@ def update_voucher_offer(offer, benefit_value, benefit_type, coupon, max_uses=No
         offer (Offer): Offer associated with a voucher.
         benefit_value (Decimal): Value of benefit associated with vouchers.
         benefit_type (str): Type of benefit associated with vouchers.
+        coupon (Product): The coupon whos offer(s) is updated.
+
+    Kwargs:
+        max_uses (int): number of maximum global application number an offer can have.
+        email_domains (str): a comma-separated string of email domains allowed to apply
+                            this offer.
 
     Returns:
         Offer
@@ -492,5 +517,6 @@ def update_voucher_offer(offer, benefit_value, benefit_type, coupon, max_uses=No
         benefit_value=benefit_value,
         benefit_type=benefit_type,
         coupon_id=coupon.id,
-        max_uses=max_uses
+        max_uses=max_uses,
+        email_domains=email_domains
     )
