@@ -4,5 +4,30 @@
     <div class="container">
         <a {% if admin == "course" %}class="selected"{% endif %} href="/courses/">{% trans "Courses" %}</a>
         <a {% if admin == "coupon" %}class="selected"{% endif %} href="/coupons/">{% trans "Coupons" %}</a>
+        <ul class="nav navbar-nav navbar-right">
+            {% if user.is_authenticated %}
+                <li class="btn-group user-menu">
+                    <button type="button" class="btn btn-default hidden-xs main-btn nav-button"
+                            onclick="window.open('{{ lms_dashboard_url }}');">
+                        <span class="sr-only">{% trans "Dashboard for:" %}</span>
+                        My Account
+                    </button>
+                    <button type="button" class="btn btn-default dropdown-toggle hidden-xs nav-button"
+                            data-toggle="dropdown"
+                            aria-haspopup="true">
+                        <span class="caret"></span>
+                        <span class="sr-only">{% trans "Toggle Dropdown" %}</span>
+                    </button>
+                    <ul class="dropdown-menu" aria-expanded="false">
+                        {% include "courses/menu_options.html" %}
+                    </ul>
+                    {% include "courses/menu_options.html" with additional_class="visible-xs" %}
+                </li>
+            {% else %}
+                <a class="btn btn-primary navbar-btn hidden-xs" href="{% url 'login' %}">{% trans "Login" %}</a>
+                <li class="visible-xs"><a class="nav-link" href="{% url 'login' %}">{% trans "Login" %}</a></li>
+                </a>
+            {% endif %}
+        </ul>
     </div>
 </nav>
