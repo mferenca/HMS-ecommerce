@@ -1,9 +1,10 @@
 #offer {
     .container {
-        padding-top: 60px;
-        padding-bottom: spacing-vertical(small);
+        padding: 0 0 spacing-vertical(small) 0;
 
         .row {
+            padding-top: 65px;
+
             .pagination-block {
                 .pagination {
                     padding: 0 15px;
