@@ -70,10 +70,24 @@ def send_course_purchase_email(sender, order=None, **kwargs):  # pylint: disable
             product = order.lines.first().product
             provider_id = getattr(product.attr, 'credit_provider', None)
             if not provider_id:
+                send_notification(
+                    order.user,
+                    'CREDIT_RECEIPT',
+                    {
+                        'course_title': product.title,
+                        'receipt_page_url': get_lms_url(
+                            '{}?orderNum={}'.format(settings.RECEIPT_PAGE_PATH, order.number)
+                        ),
+                        'credit_hours': 1,
+                        'credit_provider': 'Credit provider',
+                    },
+                    threadlocals.get_current_request().site
+                )
                 logger.error(
-                    'Failed to send credit receipt notification. Credit seat product [%s] has not provider.', product.id
+                    'Failed to send credit receipt notification. Credit seat product [%s] has no provider.', product.id
                 )
                 return
+
             elif product.get_product_class().name == 'Seat':
                 provider_data = get_provider_data(provider_id)
                 if provider_data:
