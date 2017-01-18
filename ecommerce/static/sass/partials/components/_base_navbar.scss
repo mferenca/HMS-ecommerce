@@ -2,6 +2,7 @@
 // --------------------------------------------------
 
 .btn-group.user-menu {
+  margin: -12px 15px 0 0;
 
   .nav-button {
     background-color: white;
@@ -12,7 +13,7 @@
     }
 
     .caret {
-      margin-top: 5px;
+      margin-top: 10px;
     }
   }
 
@@ -20,7 +21,7 @@
     background-color: white;
     border: none;
 
-    padding: 10px 13px 12px;
+    padding: 13px 13px 15px;
 
     font-family: AvenirLTStd-Book, sans-serif;
     font-size: 16px;
@@ -49,6 +50,7 @@
     min-width: 120px;
 
     .nav-link {
+      padding: 3px 20px;
       font-family: AvenirLTStd-Book, sans-serif;
       font-size: 16px;
       text-transform: uppercase;
