@@ -1,6 +1,6 @@
 .basket {
     .container {
-        padding: 60px 20px 30px 20px;
+        padding: 60px 0 30px 0;
 
         .alertinner p:last-child {
             display: none;
@@ -15,7 +15,11 @@
             border-bottom: 1px solid #ddd;
 
             .certificate_type {
-                font-weight: bold;
+                padding-left: 20px;
+                border-bottom: 2px solid #bdb6b2;
+                color: #A51C30;
+                font-family: "AvenirLTStd-Book", sans-serif;
+                font-size: 30px;
             }
 
             .row {
@@ -178,7 +182,7 @@
             #basket_totals {
                 @include text-align(right);
 
-                color: #337ab7;
+                color: #00a69c;
                 font-size: 18px;
                 font-weight: bold;
             }
@@ -199,10 +203,10 @@
         .payment-buttons {
             .payment-button {
                 border-color: palette(primary, accent);
-                padding: spacing-vertical(small) spacing-horizontal(mid-large);
+                padding: spacing-vertical(small)/2 spacing-horizontal(small);
                 background: palette(primary, accent);
                 color: #fcfcfc;
-                font-size: 18px;
+                font-size: 14px;
 
                 &:hover,
                 &.is-hovered,
