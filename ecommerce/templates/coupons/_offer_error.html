@@ -19,13 +19,13 @@
             <div class="depth depth-2 message-error">
                 <h3>
                     {{ error }}
-                    {% if account_activation_error %}
-                    <ol>
-                        <li>{{ step_one }}</li>
-                        <li>{{ step_two }}</li>
-                    </ol>
-                    {% endif %}
                 </h3>
+                {% if account_activation_error %}
+                <ol>
+                    <li>{{ step_one }}</li>
+                    <li>{{ step_two }}</li>
+                </ol>
+                {% endif %}
                 <p>{% trans "If you need assistance, contact <span>onlinelearning@hms.harvard.edu</span>." %}</p>
             </div>
         </div>
