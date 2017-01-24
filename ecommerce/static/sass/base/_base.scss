@@ -11,10 +11,16 @@ body {
     font-family: "AvenirLTStd-Book", sans-serif;
   }
   .btn-primary, .btn-success {
-    background-color: palette(primary, accent); // $brand-primary-accent !important;
-    border-color: palette(primary, accent);;
-    &:active, &:focus, &:hover  {
-      background-color: palette(secondary, accent) !important;
+    background-color: palette(secondary, accent);
+    border-color: palette(secondary, accent);
+    padding: spacing-vertical(small)/2 spacing-horizontal(base);
+    font-family: AvenirLTStd-Book, sans-serif;
+    font-size: 15px;
+    font-weight: normal;
+    line-height: 16px;
+    text-shadow: rgb(0, 57, 84) 0 1px 0;
+    &:active, &:focus, &:hover {
+      background-color: palette(secondary, accent);
       border-color: palette(secondary, accent);
     }
   }
