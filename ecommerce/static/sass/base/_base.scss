@@ -19,10 +19,17 @@ body {
     font-weight: normal;
     line-height: 16px;
     text-shadow: rgb(0, 57, 84) 0 1px 0;
-    &:active, &:focus, &:hover {
+
+    &:active, &:active:focus, &:focus, &:hover {
       background-color: palette(secondary, accent);
       border-color: palette(secondary, accent);
     }
+  }
+  .btn-default {
+    padding: spacing-vertical(small)/2 spacing-horizontal(base);
+    font-family: AvenirLTStd-Book, sans-serif;
+    font-size: 15px;
+    line-height: 16px;
   }
 }
 
