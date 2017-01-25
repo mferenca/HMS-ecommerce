@@ -163,16 +163,16 @@
                     margin: 0;
                 }
                 .voucher-valid-until {
-                    font-size: 12px;
                     position: absolute;
+                    width: 100%;
                     bottom: 0;
                     background-color: $gray-transparent;
+                    padding: 7px;
                     text-align: center;
-                    width: 100%;
+                    font-size: 12px;
 
                     p {
                         margin: 0;
-                        padding: 7px 0;
                     }
                 }
                 .course-price {
