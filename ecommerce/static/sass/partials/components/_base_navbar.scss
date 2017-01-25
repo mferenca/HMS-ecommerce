@@ -38,15 +38,21 @@
     border-radius: 4px;
     box-shadow: 0 2px 2px 0 rgba(0,0,0,0.3);
     border: 1px solid #c8c8c8;
-    padding: 5px 10px;
+    padding: 5px 30px;
     top: 40px;
     right: -10px;
 
+    li:not(:first-child) {
+      border-top: 1px dotted #c8c8c8;
+    }
+
     .nav-link {
-      padding: 3px 20px;
+      margin: 0;
+      padding: 8px 6px;
       color: #c41731;
       font-family: AvenirLTStd-Book, sans-serif;
       font-size: 16px;
+      line-height: 26px;
       text-transform: uppercase;
 
       &:hover {
