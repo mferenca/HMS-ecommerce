@@ -7,20 +7,26 @@
     {% include 'edx/partials/_student_navbar.html' %}
 {% endblock navbar %}
 
+{% block dropdown %}
+    <div class="container dropdown-container">
+        {% include 'edx/partials/_account_dropdown.html' %}
+    </div>
+{% endblock dropdown %}
+
 {% block content %}
     <div id="offer">
         <div class="container">
             <div class="depth depth-2 message-error">
                 <h3>
                     {{ error }}
-                    {% if account_activation_error %}
-                    <ol>
-                        <li>{{ step_one }}</li>
-                        <li>{{ step_two }}</li>
-                    </ol>
-                    {% endif %}
                 </h3>
-                <p>{% trans "If you need assistance, contact onlinelearning@hms.harvard.edu." %}</p>
+                {% if account_activation_error %}
+                <ol>
+                    <li>{{ step_one }}</li>
+                    <li>{{ step_two }}</li>
+                </ol>
+                {% endif %}
+                <p>{% trans "If you need assistance, contact <span>onlinelearning@hms.harvard.edu</span>." %}</p>
             </div>
         </div>
     </div>

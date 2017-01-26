@@ -4,5 +4,6 @@
     <div class="container">
         <a {% if admin == "course" %}class="selected"{% endif %} href="/courses/">{% trans "Courses" %}</a>
         <a {% if admin == "coupon" %}class="selected"{% endif %} href="/coupons/">{% trans "Coupons" %}</a>
+        {% include 'edx/partials/_account_dropdown.html' %}
     </div>
 </nav>

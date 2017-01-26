@@ -1,5 +1,4 @@
 <section class="col-xs-12 col-md-8 <% if (courses.length == 1) { %>col-lg-8 col-lg-offset-2<% }else { %>col-lg-12<% } %>">
-
     <% if (courses.length > 1) { %>
     <h3 class="number-of-products-header col-xs-12"><%- gettext('Select one of the following courses.') %></h3>
     <% } %>
@@ -28,7 +27,8 @@
                                  alt="<%= course.attributes.title %>"/>
 
                             <div class="voucher-valid-until">
-                                <p><%= course.attributes.voucher_end_date_text %></p>
+                                <p><%- gettext('Discount valid until:') %></p>
+                                <p><%= course.attributes.voucher_end_date %></p>
                             </div>
                         </div>
                     </div>

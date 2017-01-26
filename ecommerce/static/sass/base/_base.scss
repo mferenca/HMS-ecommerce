@@ -11,12 +11,25 @@ body {
     font-family: "AvenirLTStd-Book", sans-serif;
   }
   .btn-primary, .btn-success {
-    background-color: palette(primary, accent); // $brand-primary-accent !important;
-    border-color: palette(primary, accent);;
-    &:active, &:focus, &:hover  {
-      background-color: palette(secondary, accent) !important;
+    background-color: palette(secondary, accent);
+    border-color: palette(secondary, accent);
+    padding: spacing-vertical(small)/2 spacing-horizontal(base);
+    font-family: AvenirLTStd-Book, sans-serif;
+    font-size: 15px;
+    font-weight: normal;
+    line-height: 16px;
+    text-shadow: rgb(0, 57, 84) 0 1px 0;
+
+    &:active, &:active:focus, &:focus, &:hover {
+      background-color: palette(secondary, accent);
       border-color: palette(secondary, accent);
     }
+  }
+  .btn-default {
+    padding: spacing-vertical(small)/2 spacing-horizontal(base);
+    font-family: AvenirLTStd-Book, sans-serif;
+    font-size: 15px;
+    line-height: 16px;
   }
 }
 
@@ -29,6 +42,10 @@ a {
 
 .container {
   background-color: $container-bg;
+}
+
+.dropdown-container {
+  padding-top: 20px;
 }
 
 .sr {
@@ -50,11 +67,13 @@ a {
 }
 
 .message-error {
-  border-top: 4px solid #B20610;
   h3 {
     margin-bottom: 10px;
+    padding-left: 20px;
+    border-bottom: 2px solid #bdb6b2;
+    color: #A51C30;
     font-family: "AvenirLTStd-Book", sans-serif;
-    font-weight: bold;
+    font-size: 30px;
   }
   ol {
     margin-bottom: 0;
@@ -62,16 +81,19 @@ a {
   }
   p {
     margin-bottom: 0;
+    padding: 20px;
+    span {
+      color: #A51C30;
+    }
   }
 }
 
 .depth {
-  padding: 1.25rem 1.25rem;
+  // padding: 1.25rem 1.25rem;
 }
 
 .depth-2 {
-  background: #fcfcfc;
-  box-shadow: 0 1px 2px 1px rgba(167, 164, 164, 0.25);
+
 }
 
 .depth--3 {

@@ -1,8 +1,8 @@
 // local variables
 // --------------------
 $brand-logo-path: '/static/images/default-logo.png' !default;
-$brand-logo-width: 273px !default;
-$brand-logo-height: 48px !default;
+$brand-logo-width: 370px !default;
+$brand-logo-height: 85px !default;
 
 // utilities
 @import "utilities/mixins";
@@ -11,6 +11,6 @@ $brand-logo-height: 48px !default;
 // --------------------
 .navbar-brand {
     .navbar-brand-logo {
-        @include brand-logo($brand-logo-path, $brand-logo-width, $brand-logo-height, 48px);
+        @include brand-logo($brand-logo-path, $brand-logo-width, $brand-logo-height, 85px);
     }
 }

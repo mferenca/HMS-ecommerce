@@ -20,11 +20,15 @@
 
   // Add our own border
   .container {
+    height: 95px;
+    padding: 10px 0;
     border-bottom: $navbar-border-bottom-width solid palette(secondary, accent);
   }
 
   // Vertically center the logo
   .navbar-brand {
+    margin-top: 10px;
+
     &:active,
     &:focus,
     &:hover {
@@ -37,8 +41,9 @@
 
     .navbar-brand-app {
       @include center-vertically;
-      top: 0;
+      // top: 0;
       display: inline-block;
+      padding-bottom: 30px;
       color: palette(primary, accent);
       font-weight: 600;
     }

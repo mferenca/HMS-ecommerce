@@ -2,57 +2,58 @@
 // --------------------------------------------------
 
 .btn-group.user-menu {
+  margin: -12px 15px 0 0;
 
-  .nav-button {
-    background-color: white;
-    border: none;
-    color: black;
-    &:active {
-      box-shadow: none;
-    }
-
-    .caret {
-      margin-top: 5px;
-    }
+  .fa {
+    position: relative;
+    bottom: 4px;
+    margin-left: 15px;
   }
 
   .main-btn {
     background-color: white;
     border: none;
+    border-radius: 3px !important;
 
-    padding: 10px 13px 12px;
+    padding: 13px 13px 15px;
 
+    color: #8C8179;
     font-family: AvenirLTStd-Book, sans-serif;
     font-size: 16px;
     font-weight: 400;
     text-transform: uppercase;
-    color: #8C8179;
 
-    &:hover,
-    &:focus {
+    &:hover {
       background-color: #f6f6f6;
-      color: black;
+      color: #333;
     }
-  }
 
-  .dropdown-toggle:focus {
-    background-color: white;
-    box-shadow: none;
+    &:focus {
+      outline: none;
+      box-shadow: none;
+    }
   }
 
   .dropdown-menu {
     border-radius: 4px;
     box-shadow: 0 2px 2px 0 rgba(0,0,0,0.3);
     border: 1px solid #c8c8c8;
-    padding: 5px 10px;
-    top: 37px;
-    min-width: 120px;
+    padding: 5px 30px;
+    top: 40px;
+    right: -10px;
+
+    li:not(:first-child) {
+      border-top: 1px dotted #c8c8c8;
+    }
 
     .nav-link {
+      margin: 0;
+      padding: 8px 6px;
+      color: #c41731;
       font-family: AvenirLTStd-Book, sans-serif;
       font-size: 16px;
+      line-height: 26px;
       text-transform: uppercase;
-      color: #c41731;
 
       &:hover {
         background-color: white;
@@ -70,7 +71,7 @@
     content: "";
     position: absolute;
     transform: rotate(-45deg);
-    right: 5px;
     top: -6px;
+    right: 20px;
   }
 }
