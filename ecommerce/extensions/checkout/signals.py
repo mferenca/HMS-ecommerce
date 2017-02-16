@@ -70,15 +70,18 @@ def send_course_purchase_email(sender, order=None, **kwargs):  # pylint: disable
             product = order.lines.first().product
             provider_id = getattr(product.attr, 'credit_provider', None)
             if not provider_id:
+                stripped_title = product.title.replace("Seat in ","",1)
+                stripped_title = stripped_title.replace("with professional certificate", "")
+                stripped_title = stripped_title.replace("with verified certificate", "")
                 send_notification(
                     order.user,
                     'CREDIT_RECEIPT',
                     {
-                        'course_title': product.title,
+                        'course_title': stripped_title,
                         'receipt_page_url': get_lms_url(
                             '{}?orderNum={}'.format(settings.RECEIPT_PAGE_PATH, order.number)
                         ),
-                        'credit_hours': 1,
+                        'credit_hours': str(order.total_excl_tax),
                         'credit_provider': 'Credit provider',
                     },
                     threadlocals.get_current_request().site
