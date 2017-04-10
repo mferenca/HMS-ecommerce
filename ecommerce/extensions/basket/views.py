@@ -113,15 +113,15 @@ class BasketSummaryView(BasketView):
             image_url = None
             short_description = None
             try:
-                course = get_course_info_from_catalog(self.request.site, course_key)
+                course = get_course_info_from_lms(course_key)
                 try:
-                    image_url = course['image']['src']
+                    image_url = course['media']['image']['raw']
                 except (KeyError, TypeError):
                     image_url = ''
                 short_description = course.get('short_description', '')
-                course_name = course.get('title', '')
+                course_name = course['name']
             except (ConnectionError, SlumberBaseException, Timeout):
-                logger.exception('Failed to retrieve data from Catalog Service for course [%s].', course_key)
+                logger.exception('Failed to retrieve data from Course API for course [%s].', course_key)
 
             if self.request.site.siteconfiguration.enable_enrollment_codes:
                 # Get variables for the switch link that toggles from enrollment codes and seat.
