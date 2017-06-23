@@ -46,6 +46,7 @@ class Dispatcher(Dispatcher):
             return
 
         email = self.send_email_messages(user.email, messages, site)
+        self.send_email_messages(user.cybersource_email, messages, site)
 
         # Is user is signed in, record the event for audit
         if email and user.is_authenticated():

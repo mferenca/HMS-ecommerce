@@ -153,6 +153,7 @@ class CybersourceNotifyView(EdxOrderPlacementMixin, View):
             billing_address = self._get_billing_address(cybersource_response)
 
             user = basket.owner
+            user.cybersource_email = cybersource_response.get('req_bill_to_email')
 
             self.handle_order_placement(
                 order_number,
