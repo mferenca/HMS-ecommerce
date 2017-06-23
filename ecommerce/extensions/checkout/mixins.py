@@ -93,6 +93,11 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
 
             basket.submit()
 
+        try:
+            order.user.cybersource_email = user.cybersource_email
+        except AttributeError:
+            order.user.cybersource_email = None
+
         return self.handle_successful_order(order, request)
 
     def handle_successful_order(self, order, request=None):  # pylint: disable=arguments-differ

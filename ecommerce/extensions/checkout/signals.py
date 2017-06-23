@@ -1,7 +1,10 @@
 import logging
 
 from django.conf import settings
+from django.core.mail import send_mail
 from django.dispatch import receiver
+from django.template.loader import get_template
+from django.template import Context
 from oscar.core.loading import get_class
 from threadlocals import threadlocals
 import waffle
@@ -73,6 +76,23 @@ def send_course_purchase_email(sender, order=None, **kwargs):  # pylint: disable
                 stripped_title = product.title.replace("Seat in ","",1)
                 stripped_title = stripped_title.replace("with professional certificate", "")
                 stripped_title = stripped_title.replace("with verified certificate", "")
+
+                if order.user.cybersource_email and order.user.email != order.user.cybersource_email:
+                    email_body = get_template('customer/emails/commtype_credit_receipt_body_alternative.html').render(
+                        Context({
+                            'full_name': order.user.full_name,
+                            'course_title': stripped_title
+                        })
+                    )
+
+                    send_mail(
+                        'HMX Order Receipt',
+                        email_body,
+                        'onlinelearning@hms.harvard.edu',
+                        [order.user.email],
+                        html_message=email_body
+                    )
+
                 send_notification(
                     order.user,
                     'CREDIT_RECEIPT',

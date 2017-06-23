@@ -1,0 +1,34 @@
+{% extends 'customer/email_base.html' %}
+{% load i18n %}
+{% block body %}
+
+  <tr>
+    <table style="border-spacing:0; padding:20px;">
+      <tr>
+        <td colspan="2" style="border-collapse: collapse;">
+          <p style="padding: 5px 0;">
+            {% blocktrans %}Dear {{full_name}},{% endblocktrans %}
+          </p>
+
+          <p style="padding: 5px 0;">
+            {% blocktrans with course_title=course_title %}
+              This confirms your successful payment for enrollment in {{ course_title }}.
+              <br>
+              A receipt for this payment has been sent to the email address entered on the payment page.
+            {% endblocktrans %}
+          </p>
+
+          <p style="padding: 5px 0;">
+            {% blocktrans %}Thank you,{% endblocktrans %}<br>The HMX Team
+          </p>
+
+          <p style="padding: 5px 0;">
+            If you have any further questions, please contact us at onlinelearning@hms.harvard.edu
+          </p>
+        </td>
+      </tr>
+      {% block footer %}{% endblock footer %}
+    </table>
+  </tr>
+
+{% endblock body %}
