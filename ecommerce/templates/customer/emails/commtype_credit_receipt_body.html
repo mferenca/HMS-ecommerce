@@ -2,40 +2,37 @@
 {% load i18n %}
 {% block body %}
 
-    <tr>
-        <table class="cn-body">
+  <tr>
+    <table class="cn-body">
 
-            <!-- Message Body -->
-	    <tr class="cn-content cn-full-width">
-                <td colspan="2">
-                    <p>
-                        {% blocktrans %}Dear {{full_name}},{% endblocktrans %}
-                    </p>
+      <!-- Message Body -->
+      <tr class="cn-content cn-full-width">
+        <td colspan="2">
+          <p>
+            {% blocktrans %}Dear {{full_name}},{% endblocktrans %}
+          </p>
 
-                    <p>
-                        {% blocktrans with course_title=course_title %}
-                            This confirms your successful payment of ${{credit_hours}} for enrollment in {{course_title}}.
-                        {% endblocktrans %}
-                    </p>
+          <p>
+            {% blocktrans with course_title=course_title %}
+                This confirms your successful payment of ${{credit_hours}} for enrollment in {{course_title}}.
+            {% endblocktrans %}
+          </p>
 
-                    <p>
-                        {% blocktrans %}Thank you,{% endblocktrans %}<br>
-			The HMX Team
-                    </p>
+          <p>
+            {% blocktrans %}Thank you,{% endblocktrans %}<br>The HMX Team
+          </p>
 
-                    <p>
-                        <a href="{{ receipt_page_url }}">
-                                  View your payment information
-                        </a>
-                    </p>
+          <p>
+            <a href="{{ receipt_page_url }}">View your payment information </a>(requires login to your HMX account)
+          </p>
 
-                    <p>If you have any further questions, please contact us at onlinelearning@hms.harvard.edu</p>
-                </td>
-            </tr>
+          <p>If you have any further questions, please contact us at onlinelearning@hms.harvard.edu</p>
+        </td>
+      </tr>
 
-            <!-- Empty base footer -->
-            {% block footer %}{% endblock footer %}
-        </table>
-    </tr>
+      <!-- Empty base footer -->
+      {% block footer %}{% endblock footer %}
+    </table>
+  </tr>
 
 {% endblock body %}
