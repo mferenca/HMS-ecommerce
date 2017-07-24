@@ -77,9 +77,13 @@ def send_course_purchase_email(sender, order=None, **kwargs):  # pylint: disable
                 stripped_title = stripped_title.replace("with professional certificate", "")
                 stripped_title = stripped_title.replace("with verified certificate", "")
 
-                if order.user.email != order.user.cybersource_email:
+                if order.user.cybersource_email and order.user.email != order.user.cybersource_email:
                     email_body = get_template('customer/emails/commtype_credit_receipt_body_alternative.html').render(
-                        Context({'full_name': order.user.full_name, 'course_title': stripped_title, 'cybersource_email': order.user.cybersource_email})
+                        Context({
+                            'full_name': order.user.full_name,
+                            'course_title': stripped_title,
+                            'cybersource_email': order.user.cybersource_email
+                        })
                     )
 
                     send_mail(

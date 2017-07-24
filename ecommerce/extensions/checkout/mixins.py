@@ -93,7 +93,10 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
 
             basket.submit()
 
-        order.user.cybersource_email = user.cybersource_email
+        try:
+            order.user.cybersource_email = user.cybersource_email
+        except AttributeError:
+            order.user.cybersource_email = None
 
         return self.handle_successful_order(order, request)
 
