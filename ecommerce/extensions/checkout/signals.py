@@ -81,8 +81,7 @@ def send_course_purchase_email(sender, order=None, **kwargs):  # pylint: disable
                     email_body = get_template('customer/emails/commtype_credit_receipt_body_alternative.html').render(
                         Context({
                             'full_name': order.user.full_name,
-                            'course_title': stripped_title,
-                            'cybersource_email': order.user.cybersource_email
+                            'course_title': stripped_title
                         })
                     )
 
